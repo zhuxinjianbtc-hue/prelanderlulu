@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>脑洞实验室｜1分钟趣味智力挑战</title>
+  <style>
+    :root { --bg:#0b1020; --card:#121a33; --text:#eaf0ff; --muted:#a9b4d0; --accent:#7c5cff; --ok:#25c18a; --bad:#ff5c7a; }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#070a14 0%, #0b1020 60%, #070a14 100%);color:var(--text);}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:980px;margin:0 auto;padding:18px;}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+    .brand{font-weight:800;letter-spacing:.5px}
+    .nav a{color:var(--muted);margin-left:14px;font-size:14px}
+    .bar{background:rgba(124,92,255,.15);border:1px solid rgba(124,92,255,.35);padding:10px 12px;border-radius:12px;color:var(--text);font-size:14px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px;align-items:stretch}
+    .card{background:rgba(18,26,51,.85);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 8px;font-size:30px;line-height:1.2}
+    .sub{color:var(--muted);line-height:1.6}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button{cursor:pointer;border:0;border-radius:14px;padding:12px 14px;font-weight:700}
+    .primary{background:var(--accent);color:white}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--text)}
+    .stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+    .quizHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .progress{flex:1;height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#25c18a)}
+    .qtitle{font-weight:800}
+    .qbox{margin-top:8px}
+    .opt{display:block;margin-top:10px}
+    .opt input{margin-right:8px}
+    .hint{margin-top:10px;color:var(--muted);font-size:13px}
+    .feedback{margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);display:none}
+    .feedback.ok{background:rgba(37,193,138,.12);border-color:rgba(37,193,138,.35)}
+    .feedback.bad{background:rgba(255,92,122,.10);border-color:rgba(255,92,122,.30)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .muted{color:var(--muted)}
+    .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
+    .cta a{display:inline-block;background:linear-gradient(90deg,var(--accent),#25c18a);padding:12px 14px;border-radius:14px;font-weight:900}
+    .footer{margin:22px 0 8px;color:rgba(255,255,255,.45);font-size:12px;line-height:1.7}
+    @media (max-width:860px){ .hero{grid-template-columns:1fr} .grid2{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">脑洞实验室</div>
+      <div>
+        <a href="#quiz">今日挑战</a>
+        <a href="#why">题目解析</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+
+    <div class="bar">🔥 今日挑战：完成 3 题，解锁你的「脑力类型」与训练建议（娱乐性质）</div>
+
+    <div class="hero">
+      <div class="card">
+        <h1>1 分钟测测你的反应力与逻辑力</h1>
+        <div class="sub">3 道趣味小题，看看你属于哪种“脑力类型”。答完会给你专属建议：更适合练速度、练逻辑，还是练细节。</div>
+        <div class="btns">
+          <button class="primary" id="btnStart">开始挑战（第 1/3 题）</button>
+          <button class="ghost" id="btnPreview">我先看看题目</button>
+        </div>
+        <div class="stat">
+          <div class="pill">⏱ 平均用时 58 秒</div>
+          <div class="pill">📌 今日参与 23,481 人</div>
+          <div class="pill">✅ 解析可见，不藏答案</div>
+        </div>
+      </div>
+
+      <div class="card" id="scoreCard">
+        <div class="qtitle">你的进度</div>
+        <div class="quizHead" style="margin-top:10px">
+          <div class="progress"><i id="prog"></i></div>
+          <div class="muted"><span id="stepTxt">0</span>/3</div>
+        </div>
+        <div class="muted" id="miniTip">点击“开始挑战”进入第 1 题。</div>
+      </div>
+    </div>
+
+    <div class="card" id="quiz" style="margin-top:16px; display:none;">
+      <div class="quizHead">
+        <div class="qtitle" id="qHeader">第 1 题 / 3</div>
+        <div class="muted" id="timerBox" style="display:none;">剩余 <span id="tLeft">7</span>s</div>
+      </div>
+
+      <div class="qbox" id="qBox"></div>
+
+      <div class="btns" style="margin-top:12px">
+        <button class="primary" id="btnSubmit">提交答案</button>
+        <button class="ghost" id="btnNext" style="display:none;">下一题 →</button>
+      </div>
+
+      <div class="feedback" id="fb"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card" id="why">
+        <div class="qtitle">这些题在测什么？</div>
+        <p class="muted">我们把小游戏拆成三类能力：找规律（结构化思维）、推理（条件约束）、注意力/反应（速度与抗干扰）。单次测试不“科学诊断”，但很适合做训练的起点。</p>
+        <p class="muted">打个比方：这像“跑 100 米、立定跳远、折返跑”——不能代表你全部运动能力，但能快速看出你更偏速度、力量还是耐力。</p>
+      </div>
+
+      <div class="card" id="result" style="display:none;">
+        <div class="qtitle">你的结果</div>
+        <div id="resultBody" class="muted" style="margin-top:10px"></div>
+        <div class="cta">
+          <div class="muted">想继续练？去完整题库解锁每日挑战。</div>
+          <a id="ctaLink" href="#" rel="nofollow noopener">解锁完整题库与每日挑战 →</a>
+        </div>
+        <div class="hint">提示：你也可以先截图结果分享给朋友，再继续挑战。</div>
+      </div>
+    </div>
+
+    <div class="card" id="faq" style="margin-top:16px">
+      <div class="qtitle">FAQ</div>
+      <p class="muted"><b>Q：</b>一定要注册吗？<br><b>A：</b>不需要。你可以先做完 3 题看结果；如果想要“每日挑战 / 更多题型 / 难度进阶”，再选择进入完整题库。</p>
+      <p class="muted"><b>Q：</b>这个测试准吗？<br><b>A：</b>它是娱乐训练型的“快速测”，更像健身房的热身测试：让你知道下一步该练哪块。</p>
+      <p class="muted"><b>Q：</b>适合谁？<br><b>A：</b>通勤碎片时间、想练专注、想做轻度脑力训练的人都适合。</p>
+    </div>
+
+    <div class="footer">
+      © 脑洞实验室（示例页）｜隐私政策｜Cookie｜联系<br/>
+      免责声明：本页面测试为娱乐性质，不构成医疗、心理或专业建议。
+    </div>
+  </div>
+
+  <script>
+    // ====== 配置区：把 FINAL_URL 换成你的 Tracker 最终投放链接 ======
+    const FINAL_URL = "https://example.com/track?camp=XXX&clickid={clickid}";
+    // ================================================================
+
+    // 简易埋点占位：你可以替换成 fetch 到你的 tracker/event endpoint
+    function track(event, data={}) {
+      console.log("[track]", event, data);
+      // 示例：navigator.sendBeacon("https://your-tracker.com/event", JSON.stringify({event, ...data}));
+    }
+
+    const $ = (id)=>document.getElementById(id);
+
+    const questions = [
+      {
+        id: "q1",
+        header: "第 1 题 / 3：找规律",
+        html: `
+          <div class="sub">下面这组数列，下一个数字最可能是？</div>
+          <div style="margin-top:10px;font-size:20px;font-weight:800">2, 6, 12, 20, 30, ?</div>
+          <label class="opt"><input type="radio" name="opt" value="A">A. 40</label>
+          <label class="opt"><input type="radio" name="opt" value="B">B. 41</label>
+          <label class="opt"><input type="radio" name="opt" value="C">C. 42</label>
+          <label class="opt"><input type="radio" name="opt" value="D">D. 44</label>
+        `,
+        correct: "C",
+        explain: "差值依次为 4, 6, 8, 10… 下一个差值 12，所以 30+12=42。"
+      },
+      {
+        id: "q2",
+        header: "第 2 题 / 3：逻辑推理",
+        html: `
+          <div class="sub">有 3 个盒子：A 写“苹果”，B 写“橙子”，C 写“苹果+橙子”。但三个标签都贴错了。你只允许从一个盒子里拿出一个水果看一眼，如何确定三个盒子分别装什么？</div>
+          <label class="opt"><input type="radio" name="opt" value="A">从“苹果+橙子”盒取一个</label>
+          <label class="opt"><input type="radio" name="opt" value="B">从“苹果”盒取一个</label>
+          <label class="opt"><input type="radio" name="opt" value="C">从“橙子”盒取一个</label>
+          <label class="opt"><input type="radio" name="opt" value="D">都不行</label>
+        `,
+        correct: "A",
+        explain: "因为三个标签都错，“苹果+橙子”盒不可能是混装。拿出一个水果后就能确定它是纯苹果或纯橙子，从而反推剩余两个盒子的真实内容。"
+      },
+      {
+        id: "q3",
+        header: "第 3 题 / 3：注意力（限时 7 秒）",
+        timed: true,
+        seconds: 7,
+        str: "1727372717273727172737",
+        get correct() {
+          // 统计字符串中 '7' 的次数
+          return String(this.str).split("").filter(c=>c==="7").length;
+        },
+        htmlFn() {
+          return `
+            <div class="sub">在下面字符串里，数字“7”出现了几次？（限时 7 秒）</div>
+            <div style="margin-top:10px;font-size:18px;font-weight:800;word-break:break-all">${this.str}</div>
+            <label class="opt"><input type="radio" name="opt" value="7">7 次</label>
+            <label class="opt"><input type="radio" name="opt" value="8">8 次</label>
+            <label class="opt"><input type="radio" name="opt" value="9">9 次</label>
+            <label class="opt"><input type="radio" name="opt" value="10">10 次</label>
+          `;
+        },
+        explainFn() {
+          return `正确答案是 ${this.correct} 次。这个题主要测“短时注意力 + 抗干扰”。`;
+        }
+      }
+    ];
+
+    let idx = 0;
+    let score = 0;
+    let startedAt = null;
+    let qStartAt = null;
+    let timer = null;
+
+    function setProgress(n) {
+      $("stepTxt").textContent = n;
+      $("prog").style.width = (n/3*100) + "%";
+    }
+
+    function showQuiz() {
+      $("quiz").style.display = "block";
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[idx];
+      $("qHeader").textContent = q.header;
+      $("fb").style.display = "none";
+      $("btnNext").style.display = "none";
+      $("btnSubmit").style.display = "inline-block";
+      $("hint").textContent = "提示：答完会给解析。";
+      $("timerBox").style.display = "none";
+
+      const html = q.htmlFn ? q.htmlFn() : q.html;
+      $("qBox").innerHTML = html;
+
+      qStartAt = Date.now();
+      track("view_question", {qid: q.id, step: idx+1});
+
+      // 限时题处理
+      if (q.timed) {
+        $("timerBox").style.display = "block";
+        let left = q.seconds;
+        $("tLeft").textContent = left;
+        timer && clearInterval(timer);
+        timer = setInterval(()=>{
+          left -= 1;
+          $("tLeft").textContent = left;
+          if (left <= 0) {
+            clearInterval(timer);
+            timer = null;
+            // 自动提交（如果用户没选，就算错）
+            submitAnswer(true);
+          }
+        }, 1000);
+      }
+    }
+
+    function getSelected() {
+      const el = document.querySelector('input[name="opt"]:checked');
+      return el ? el.value : null;
+    }
+
+    function submitAnswer(auto=false) {
+      const q = questions[idx];
+      const selected = getSelected();
+      const usedMs = Date.now() - qStartAt;
+
+      timer && clearInterval(timer);
+      timer = null;
+
+      let correct = false;
+      if (q.id === "q3") {
+        correct = (selected !== null) && (parseInt(selected,10) === q.correct);
+      } else {
+        correct = (selected === q.correct);
+      }
+
+      if (correct) score += 1;
+
+      track("submit_answer", {qid: q.id, step: idx+1, selected, correct, usedMs, auto});
+
+      const fb = $("fb");
+      fb.className = "feedback " + (correct ? "ok" : "bad");
+      fb.style.display = "block";
+
+      const explain = q.explainFn ? q.explainFn() : q.explain;
+      fb.innerHTML = `<b>${correct ? "答对了 ✅" : "差一点 ❌"}</b><div style="margin-top:6px">${explain}</div>`;
+
+      $("btnSubmit").style.display = "none";
+      $("btnNext").style.display = "inline-block";
+
+      $("hint").textContent = correct
+        ? "不错！继续下一题。"
+        : "别急，很多人都栽在这里。继续下一题会更有趣。";
+    }
+
+    function finish() {
+      const totalMs = Date.now() - startedAt;
+
+      // 结果类型映射
+      let type = "";
+      let desc = "";
+      if (score === 3) {
+        type = "均衡型（Balanced）";
+        desc = "你在规律、推理与注意力上都很稳。建议：把你最擅长的一项拉到“优势项”，形成明显长板。";
+      } else if (score === 2) {
+        type = "策略型（Strategy）";
+        desc = "你更擅长结构化思考与推理，但在速度或细节上可能有提升空间。建议：每天用 3-5 分钟做限时题。";
+      } else if (score === 1) {
+        type = "观察型（Observer）";
+        desc = "你对局部细节敏感，但在连续推理或节奏控制上需要更多训练。建议：先练找规律，再练条件推理。";
+      } else {
+        type = "闪电型（Lightning）";
+        desc = "你更偏“凭直觉快速反应”，但容易忽略约束条件。建议：慢半拍看题干，把条件画出来再选。";
+      }
+
+      track("view_result", {score, totalMs, type});
+
+      $("result").style.display = "block";
+      $("resultBody").innerHTML = `
+        <div style="font-size:18px;font-weight:900;margin-bottom:6px">你的脑力类型：${type}</div>
+        <div>本次得分：<b>${score}</b>/3　｜　用时：<b>${Math.round(totalMs/1000)}</b> 秒</div>
+        <div style="margin-top:10px">${desc}</div>
+        <div style="margin-top:10px">打个比方：这就像你做了 3 个“脑力小动作”——不代表全部水平，但足够告诉你下一步该怎么练。</div>
+      `;
+
+      // CTA 指向最终链接（走 tracker）
+      $("ctaLink").href = FINAL_URL;
+      $("ctaLink").addEventListener("click", ()=>track("click_cta", {score, type}));
+    }
+
+    $("btnStart").addEventListener("click", ()=>{
+      $("quiz").style.display = "block";
+      $("miniTip").textContent = "进行中：答题会显示解析与进度。";
+      startedAt = Date.now();
+      idx = 0; score = 0;
+      setProgress(0);
+      track("start_quiz");
+      renderQuestion();
+      window.location.hash = "#quiz";
+    });
+
+    $("btnPreview").addEventListener("click", ()=>{
+      $("quiz").style.display = "block";
+      track("preview_quiz");
+      renderQuestion();
+      window.location.hash = "#quiz";
+    });
+
+    $("btnSubmit").addEventListener("click", ()=>submitAnswer(false));
+
+    $("btnNext").addEventListener("click", ()=>{
+      idx += 1;
+      setProgress(idx);
+      if (idx >= questions.length) {
+        setProgress(3);
+        track("finish_quiz", {score});
+        finish();
+        return;
+      }
+      renderQuestion();
+    });
+
+    // 滚动深度埋点（简版）
+    let fired = {};
+    window.addEventListener("scroll", ()=>{
+      const h = document.documentElement;
+      const sc = (h.scrollTop)/(h.scrollHeight - h.clientHeight);
+      const p = Math.round(sc*100);
+      [25,50,75,90].forEach(k=>{
+        if (!fired[k] && p>=k) { fired[k]=true; track("scroll_depth", {percent:k}); }
+      });
+    });
+
+    track("pv");
+    setProgress(0);
+    $("ctaLink").href = FINAL_URL;
+  </script>
+</body>
+</html>
