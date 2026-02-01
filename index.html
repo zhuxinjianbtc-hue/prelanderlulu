@@ -3,390 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Winner Notification</title>
+    <title>Win $2,500.00 Cash - Spin to Win!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- Reset & Base Styles --- */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; color: #333; }
-        .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        /* --- 基础样式 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            overflow-x: hidden;
+            padding-top: 60px; /* 为顶部库存条留出空间 */
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- 1. 顶部库存/压力条 (Scarcity Bar) --- */
+        .rewards-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: #fff; z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px 0;
+        }
+        .rewards-bar-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .rewards-label { font-weight: 700; color: #ff3366; font-size: 0.9em; }
+        .rewards-track { flex: 1; height: 10px; background: #eee; border-radius: 5px; margin: 0 15px; overflow: hidden; }
+        .rewards-fill { height: 100%; width: 100%; background: #ff3366; transition: width 1s ease; }
+
+        /* --- 2. 入场引导弹窗 (Entry Modal) --- */
+        .entry-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .entry-content {
+            background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%;
+        }
+        .entry-content h3 { font-family: 'Oswald'; font-size: 1.8em; color: #1e3c72; margin-bottom: 15px; }
+        .entry-btn {
+            background: #ff3366; color: white; border: none; padding: 12px 30px;
+            border-radius: 30px; font-weight: 700; cursor: pointer; margin-top: 15px;
+        }
+
+        /* --- 转盘样式 (保持原有并增强) --- */
+        .header { text-align: center; padding: 30px 20px; background: white; border-radius: 20px; margin-bottom: 30px; }
+        .header h1 { font-family: 'Oswald'; font-size: 2.5em; color: #ff3366; text-transform: uppercase; }
         
-        /* --- Header Section --- */
-        .top-banner { background: #3b5998; color: white; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; }
-        .content { padding: 20px; text-align: center; }
-        h1 { margin: 10px 0; font-size: 24px; color: #1c1e21; }
-        .date { color: #65676b; font-size: 13px; margin-bottom: 15px; }
-        .instructions { font-size: 15px; line-height: 1.5; color: #1c1e21; margin-bottom: 20px; }
-        .highlight { color: #e41e3f; font-weight: bold; }
-
-        /* --- Wheel Section --- */
-        .wheel-wrapper { position: relative; width: 300px; height: 300px; margin: 0 auto 30px auto; overflow: hidden; }
-
-        .wheel-arrow {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) rotate(-90deg);
-            z-index: 10; width: 0; height: 0;
-            border-top: 15px solid transparent; border-bottom: 15px solid transparent;
-            border-right: 25px solid #111;
-            margin-left: 112px; /* Offset to point to the right side */
-        }
-
-        .wheel-pointer-center {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 58px; height: 58px;
-            background: #fff;
-            border-radius: 50%;
-            z-index: 11;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900;
-            color: #3b5998;
-            border: 3px solid #3b5998;
-            cursor: pointer;
-            letter-spacing: 0.6px;
-            user-select: none;
-        }
-        .wheel-pointer-center:active { transform: translate(-50%, -50%) scale(0.98); }
-
-        /* --- Realistic-looking Wheel (no shadow/reflection) --- */
+        .wheel-section { background: white; border-radius: 20px; padding: 40px 20px; text-align: center; position: relative; }
+        .wheel-container { position: relative; width: 320px; height: 320px; margin: 0 auto 30px; }
         .wheel {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 8px solid #111;
-            box-sizing: border-box;
-            position: relative;
-
-            /* 6 clean segments */
-            background: conic-gradient(
-                #ff5a3d 0deg 60deg,
-                #ffd24a 60deg 120deg,
-                #36c275 120deg 180deg,
-                #3bb7ff 180deg 240deg,
-                #9b6bff 240deg 300deg,
-                #ff4fb3 300deg 360deg
-            );
-
-            /* spin */
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            width: 100%; height: 100%; border-radius: 50%; border: 10px solid #ffd700;
+            position: relative; transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        .wheel-pointer {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            z-index: 100; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff3366;
         }
 
-        /* crisp separators like a real wheel */
-        .wheel::before{
-            content:"";
-            position:absolute; inset:0;
-            border-radius:50%;
-            background:
-                repeating-conic-gradient(
-                    #ffffff 0deg 2deg,
-                    rgba(255,255,255,0) 2deg 60deg
-                );
-            pointer-events:none;
+        /* 转盘扇区样式省略（与原代码一致） */
+        .wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 100% 100%; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+        .wheel-segment:nth-child(1) { background: #ff3366; transform: rotate(0deg); }
+        .wheel-segment:nth-child(2) { background: #ffcc00; transform: rotate(45deg); }
+        .wheel-segment:nth-child(3) { background: #33cc33; transform: rotate(90deg); }
+        .wheel-segment:nth-child(4) { background: #3366ff; transform: rotate(135deg); }
+        .wheel-segment:nth-child(5) { background: #ff6633; transform: rotate(180deg); }
+        .wheel-segment:nth-child(6) { background: #cc33ff; transform: rotate(225deg); }
+        .wheel-segment:nth-child(7) { background: #33ffcc; transform: rotate(270deg); }
+        .wheel-segment:nth-child(8) { background: #ff3399; transform: rotate(315deg); }
+
+        .spin-button {
+            font-family: 'Oswald'; font-size: 1.5em; padding: 15px 50px;
+            background: linear-gradient(135deg, #ff3366, #ff6633); color: white;
+            border: none; border-radius: 50px; cursor: pointer; font-weight: 700;
         }
 
-        /* inner ring (real wheels often have one) */
-        .wheel::after{
-            content:"";
-            position:absolute; inset:46px;
-            border-radius:50%;
-            border: 6px solid #111;
-            background: rgba(255,255,255,0.08);
-            pointer-events:none;
-        }
-
-        /* prize sticker card */
-        .prize-label {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform-origin: 0 0;
-
-            width: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-
-            /* "贴纸/牌子"感觉：白底、黑边、无阴影 */
-            background: #fff;
-            border: 2px solid #111;
-            border-radius: 12px;
-            padding: 8px 10px;
-            box-sizing: border-box;
-        }
-
-        .prize-icon {
-            width: 34px; height: 34px;
-            flex: 0 0 34px;
-        }
-
-        .prize-text {
-            text-align: right;
-            line-height: 1.05;
-            font-weight: 900;
-            color: #111;
-            flex: 1;
-        }
-        .prize-text .title { display:block; font-size: 13px; }
-        .prize-text .sub { display:block; font-size: 11px; font-weight: 700; color: #333; margin-top: 2px; }
-
-        /* highlight top cash prize (still no shadow/reflection, just strong color) */
-        .prize-label.top-prize {
-            border-width: 3px;
-            border-color: #e41e3f;
-        }
-        .prize-label.top-prize .prize-text .title { font-size: 14px; color: #e41e3f; }
-        .prize-label.top-prize .prize-text .sub { color: #e41e3f; }
-
-        /* --- Comments Section (Social Proof) --- */
-        .comments-section { background: #f0f2f5; padding: 20px; border-top: 1px solid #ddd; }
-        .comments-header { font-weight: bold; margin-bottom: 15px; color: #65676b; }
-        .comment { display: flex; margin-bottom: 15px; align-items: flex-start; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #ddd; margin-right: 10px; flex-shrink: 0; overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .comment-body { background: #fff; padding: 10px 15px; border-radius: 18px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .user-name { font-weight: bold; font-size: 13px; color: #050505; display: block; margin-bottom: 2px; }
-        .user-text { font-size: 13px; color: #050505; line-height: 1.4; }
-        .meta-info { font-size: 11px; color: #65676b; margin-top: 5px; margin-left: 10px; }
-        .meta-info span { margin-right: 10px; cursor: pointer; }
-        .like-count { color: #3b5998; }
-
-        /* --- Result Modal (Hidden by default) --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; }
-        .modal-box { background: white; padding: 30px 20px; border-radius: 10px; width: 85%; max-width: 350px; text-align: center; position: relative; animation: popIn 0.3s ease; }
-        @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        /* --- 评论区 --- */
+        .comments { background: white; border-radius: 20px; padding: 20px; margin-top: 30px; }
+        .comment-item { display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background-size: cover; }
         
-        .modal-icon { font-size: 50px; margin-bottom: 10px; }
-        .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #1c1e21; }
-        .modal-text { font-size: 15px; color: #65676b; margin-bottom: 20px; }
-        .prize-box { background: #fdf2f2; border: 1px dashed #e41e3f; padding: 10px; margin-bottom: 20px; font-weight: bold; color: #e41e3f; font-size: 18px; }
-        
-        .cta-btn {
-            background: #e41e3f; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: background 0.2s; text-decoration: none; display: block; box-sizing: border-box;
+        /* 弹窗样式 */
+        .win-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
         }
-        .cta-btn:hover { background: #c21632; }
+        .win-modal.active { display: flex; }
+        .win-modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; }
+        .claim-btn {
+            background: #33cc33; color: white; border: none; padding: 20px; width: 100%;
+            font-size: 1.5em; border-radius: 10px; cursor: pointer; font-weight: 700; margin-top: 20px;
+        }
 
+        /* 响应式 */
+        @media (max-width: 480px) { .wheel-container { width: 280px; height: 280px; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="top-banner">
-        🇺🇸 USA SPECIAL PROMOTION
+    <div class="rewards-bar">
+        <div class="rewards-bar-inner">
+            <span class="rewards-label">🔥 今日剩余奖励名额: <span id="rewardsCount">12</span></span>
+            <div class="rewards-track"><div class="rewards-fill" id="rewardsFill"></div></div>
+        </div>
     </div>
 
-    <div class="content">
-        <div class="date" id="currentDate"></div>
-        <h1>CONGRATULATIONS!</h1>
-        <p class="instructions">
-            You have been randomly selected to test our new payment system. Spin the wheel below to reveal your reward!
-            <br><br>
-            Top Prize Remaining: <span class="highlight">$2,500.00 CASH</span>
-        </p>
-
-        <div class="wheel-wrapper">
-            <div class="wheel-arrow"></div>
-            <div class="wheel-pointer-center" onclick="spinWheel()">SPIN</div>
-
-            <div class="wheel" id="wheel">
-                <!-- iPhone 15 -->
-                <div class="prize-label" style="transform: rotate(30deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="18" y="6" width="28" height="52" rx="6" fill="#111"/>
-                        <rect x="21" y="12" width="22" height="38" rx="3" fill="#ffffff"/>
-                        <circle cx="32" cy="53" r="2.5" fill="#ffffff"/>
-                        <rect x="27" y="9" width="10" height="2" rx="1" fill="#ffffff"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">iPhone 15</span>
-                        <span class="sub">Brand New</span>
-                    </div>
-                </div>
-
-                <!-- $500 Card -->
-                <div class="prize-label" style="transform: rotate(90deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="8" y="18" width="48" height="28" rx="6" fill="#111"/>
-                        <rect x="12" y="24" width="40" height="4" rx="2" fill="#ffffff"/>
-                        <rect x="12" y="33" width="14" height="9" rx="2" fill="#ffffff"/>
-                        <circle cx="46" cy="37.5" r="5" fill="#ffffff"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">$500 Card</span>
-                        <span class="sub">Gift Card</span>
-                    </div>
-                </div>
-
-                <!-- Smart Watch -->
-                <div class="prize-label" style="transform: rotate(150deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="24" y="6" width="16" height="12" rx="4" fill="#111"/>
-                        <rect x="24" y="46" width="16" height="12" rx="4" fill="#111"/>
-                        <rect x="18" y="16" width="28" height="32" rx="8" fill="#111"/>
-                        <rect x="23" y="21" width="18" height="22" rx="4" fill="#ffffff"/>
-                        <path d="M32 25 v8 l6 4" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">Smart Watch</span>
-                        <span class="sub">Latest Model</span>
-                    </div>
-                </div>
-
-                <!-- iPad Pro -->
-                <div class="prize-label" style="transform: rotate(210deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="14" y="10" width="36" height="44" rx="6" fill="#111"/>
-                        <rect x="18" y="16" width="28" height="34" rx="3" fill="#ffffff"/>
-                        <circle cx="32" cy="50.5" r="2" fill="#111"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">iPad Pro</span>
-                        <span class="sub">High Value</span>
-                    </div>
-                </div>
-
-                <!-- Tesla Model 3 -->
-                <div class="prize-label" style="transform: rotate(270deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <path d="M12 38c2-9 10-14 20-14s18 5 20 14" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
-                        <path d="M10 38h44c2 0 4 2 4 4v6H6v-6c0-2 2-4 4-4z" fill="#111"/>
-                        <circle cx="20" cy="50" r="5" fill="#111"/>
-                        <circle cx="44" cy="50" r="5" fill="#111"/>
-                        <circle cx="20" cy="50" r="2.2" fill="#fff"/>
-                        <circle cx="44" cy="50" r="2.2" fill="#fff"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">Tesla Model 3</span>
-                        <span class="sub">Grand Prize</span>
-                    </div>
-                </div>
-
-                <!-- $2,500 CASH -->
-                <div class="prize-label top-prize" style="transform: rotate(330deg) translate(86px);">
-                    <svg class="prize-icon" viewBox="0 0 64 64" aria-hidden="true">
-                        <rect x="10" y="18" width="44" height="28" rx="6" fill="#e41e3f"/>
-                        <rect x="14" y="22" width="36" height="20" rx="4" fill="#ffffff"/>
-                        <circle cx="32" cy="32" r="6" fill="#e41e3f"/>
-                        <path d="M32 26v12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M28 30h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-                    </svg>
-                    <div class="prize-text">
-                        <span class="title">$2,500 CASH</span>
-                        <span class="sub">Top Prize</span>
-                    </div>
-                </div>
-            </div>
+    <div class="entry-overlay" id="entryOverlay">
+        <div class="entry-content">
+            <h3>恭喜您！</h3>
+            <p>由于您是今天的幸运用户，您获得了一次免费抽取 $2,500.00 大奖的机会。</p>
+            <button class="entry-btn" onclick="closeEntry()">点击开始抽奖</button>
         </div>
-        
-        <p style="font-size: 12px; color: #999;">*Limited to 1 spin per IP address.</p>
     </div>
 
-    <div class="comments-section">
-        <div class="comments-header">Latest Comments (14)</div>
-
-        <div class="comment">
-            <div class="avatar"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User"></div>
-            <div>
-                <div class="comment-body">
-                    <span class="user-name">Jennifer Miller</span>
-                    <span class="user-text">I saw this ad yesterday and ignored it, but my friend told me she got the money. I just tried it and it actually worked! OMG! 😱</span>
-                </div>
-                <div class="meta-info">
-                    <span>Like</span> <span>Reply</span> <span class="like-count">Just now</span>
-                </div>
-            </div>
+    <div class="container">
+        <div class="header">
+            <h1>中奖通知</h1>
+            <p>您已被选中参与本次现金回馈活动！</p>
         </div>
 
-        <div class="comment">
-            <div class="avatar"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"></div>
-            <div>
-                <div class="comment-body">
-                    <span class="user-name">David Wilson</span>
-                    <span class="user-text">Was skeptical about the $2,500 but the registration was super easy. Waiting for the deposit now.</span>
-                </div>
-                <div class="meta-info">
-                    <span>Like</span> <span>Reply</span> <span class="like-count">4 mins ago</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="comment">
-            <div class="avatar"><img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User"></div>
-            <div>
-                <div class="comment-body">
-                    <span class="user-name">Sarah Jenkins</span>
-                    <span class="user-text">Did anyone else win the iPhone? Or just the cash? I wanted the phone lol but cash is good too! ❤️</span>
-                </div>
-                <div class="meta-info">
-                    <span>Like</span> <span>Reply</span> <span class="like-count">12 mins ago</span>
+        <div class="wheel-section">
+            <div class="wheel-container">
+                <div class="wheel-pointer"></div>
+                <div class="wheel" id="wheel">
+                    <div class="wheel-segment"></div><div class="wheel-segment"></div>
+                    <div class="wheel-segment"></div><div class="wheel-segment"></div>
+                    <div class="wheel-segment"></div><div class="wheel-segment"></div>
+                    <div class="wheel-segment"></div><div class="wheel-segment"></div>
                 </div>
             </div>
+            <button class="spin-button" id="spinButton">立即抽奖</button>
         </div>
 
-        <div class="comment">
-            <div class="avatar"><img src="https://randomuser.me/api/portraits/men/85.jpg" alt="User"></div>
-            <div>
-                <div class="comment-body">
-                    <span class="user-name">Michael Brown</span>
-                    <span class="user-text">Just filled out my info. Fingers crossed! 🤞</span>
-                </div>
-                <div class="meta-info">
-                    <span>Like</span> <span>Reply</span> <span class="like-count">35 mins ago</span>
-                </div>
+        <div class="comments">
+            <h4 style="margin-bottom: 10px;">已有 <span id="commentsTotal">73,318</span> 条评论</h4>
+            <div class="comment-item">
+                <div class="avatar" style="background-image: url('https://i.pravatar.cc/150?u=1')"></div>
+                <div><strong>Jessica M.</strong><p>天呐，我真的拿到了！</p></div>
+            </div>
+            <div class="comment-item">
+                <div class="avatar" style="background-image: url('https://i.pravatar.cc/150?u=2')"></div>
+                <div><strong>Daniel R.</strong><p>正在等支票寄到，太兴奋了。</p></div>
             </div>
         </div>
-
     </div>
-    
-    <div style="text-align: center; padding: 20px; font-size: 10px; color: #ccc;">
-        &copy; 2024 Sweepstakes Inc. Not affiliated with Facebook, Apple, or Google. <br>
-        <a href="#" style="color: #ccc;">Terms</a> | <a href="#" style="color: #ccc;">Privacy</a>
+
+    <div class="win-modal" id="winModal">
+        <div class="win-modal-content">
+            <h2>🎊 恭喜中奖！</h2>
+            <p style="font-size: 1.2em; margin: 15px 0;">您赢得了 <strong>$2,500.00 现金大奖</strong></p>
+            <button class="claim-btn" id="claimButton">点击领取奖金</button>
+        </div>
     </div>
-</div>
 
-<div class="modal-overlay" id="modal">
-    <div class="modal-box">
-        <div class="modal-icon">🎉</div>
-        <div class="modal-title">WE HAVE A WINNER!</div>
-        <div class="modal-text">
-            Congratulations! You have successfully claimed the top prize.
-        </div>
-        <div class="prize-box">
-            $2,500.00 CASH
-        </div>
-        <div class="modal-text">
-            <strong>Step 2:</strong> Fill in your shipping & payment details on the next page to receive your prize immediately.
-        </div>
-        <a href="https://YOUR-TRACKING-LINK-HERE.com" class="cta-btn">CLAIM PRIZE NOW &raquo;</a>
-        <p style="font-size: 11px; color: #999; margin-top: 10px;">Reserved for 04:59 minutes</p>
-    </div>
-</div>
+    <audio id="tickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-clock-ticking-1065.mp3"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-crowd-cheering-462.mp3"></audio>
 
-<script>
-    // 1. Dynamic Date Generator (To make it look current)
-    const dateElement = document.getElementById('currentDate');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateElement.innerText = new Date().toLocaleDateString('en-US', options);
-
-    // 2. Spin Logic
-    let hasSpun = false;
-
-    function spinWheel() {
-        if (hasSpun) return; // Prevent double spin
-        hasSpun = true;
-
+    <script>
+        let spinCount = 0;
         const wheel = document.getElementById('wheel');
-        const modal = document.getElementById('modal');
+        const spinBtn = document.getElementById('spinButton');
+        const winModal = document.getElementById('winModal');
+        const rewardsCountEl = document.getElementById('rewardsCount');
+        const rewardsFill = document.getElementById('rewardsFill');
+        const commentsTotalEl = document.getElementById('commentsTotal');
+        
+        // 音效控制
+        const tickSound = document.getElementById('tickSound');
+        const winSound = document.getElementById('winSound');
 
-        // This specific rotation value is calculated to land on "$2,500 CASH" visually
-        // Adjust the deg value slightly if you change the order of items.
-        const spinDegrees = 360 * 8 + 160; 
+        // 1. 关闭入场弹窗
+        function closeEntry() {
+            document.getElementById('entryOverlay').style.display = 'none';
+        }
 
-        wheel.style.transform = `rotate(${spinDegrees}deg)`;
+        // 2. 核心转盘逻辑 (两次转动：先输后赢)
+        spinBtn.addEventListener('click', () => {
+            if (spinCount >= 2) return;
+            
+            spinCount++;
+            spinBtn.disabled = true;
+            tickSound.play(); // 播放滴答声
 
-        // Show Modal after animation
-        setTimeout(() => {
-            modal.style.display = 'flex';
-        }, 4500);
-    }
-</script>
+            let degrees = 0;
+            if (spinCount === 1) {
+                // 第一次转动：停在 "Try Again" 附近 (约 225度)
+                degrees = 1800 + 225; 
+                setTimeout(() => {
+                    tickSound.pause();
+                    alert("差一点点！系统再额外赠送您一次免费机会！");
+                    spinBtn.disabled = false;
+                }, 4500);
+            } else {
+                // 第二次转动：必中大奖 (停在 0度)
+                degrees = 3600 + 360; 
+                setTimeout(() => {
+                    tickSound.pause();
+                    winSound.play(); // 播放欢呼声
+                    winModal.classList.add('active');
+                }, 4500);
+            }
+            wheel.style.transform = `rotate(${degrees}deg)`;
+        });
 
+        // 3. 评论人数缓慢增长
+        let totalComments = 73318;
+        setInterval(() => {
+            totalComments += Math.floor(Math.random() * 3);
+            commentsTotalEl.innerText = totalComments.toLocaleString();
+        }, 8000);
+
+        // 4. 库存自动减少逻辑
+        let rewardsLeft = 12;
+        setInterval(() => {
+            if (rewardsLeft > 3) {
+                rewardsLeft--;
+                rewardsCountEl.innerText = rewardsLeft;
+                rewardsFill.style.width = (rewardsLeft / 12 * 100) + '%';
+            }
+        }, 15000);
+
+        // 6. 智能跳转逻辑：新窗口打开 Offer，原窗口变感谢页
+        document.getElementById('claimButton').addEventListener('click', () => {
+            const offerUrl = "https://www.google.com"; // 替换为你的 Offer 链接
+            window.open(offerUrl, '_blank'); // 新窗口打开
+            
+            // 原页面内容替换，防止流失
+            document.body.innerHTML = `
+                <div style="text-align:center; padding:100px 20px; font-family:sans-serif; background:white; height:100vh;">
+                    <h1>感谢您的参与！</h1>
+                    <p style="font-size:1.2em; color:#666;">请在打开的新窗口中完成最后一步以确保奖金发放。</p>
+                    <br>
+                    <button onclick="location.reload()" style="padding:10px 20px; border-radius:5px; border:1px solid #ccc; cursor:pointer;">返回首页</button>
+                </div>
+            `;
+        });
+    </script>
 </body>
 </html>
